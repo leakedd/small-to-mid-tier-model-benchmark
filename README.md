@@ -18,8 +18,8 @@ Six models were tested across 67 items plus a 2-task repair loop.
 | Gyro-S (Qwen3.8 Flash-Next MoE) | 33 | 30 | 63 | **2/2** | 74 tok/s |
 | Bonsai 2 27B (Q2_0 ternary) | 33 | 29 | 62 | 1/2 | 46 tok/s |
 | Cybertiel 35B-A3B (UD-Q4_K_XL) | 32 | 28 | 60 | 1/2 | 114 tok/s |
-| Qwen3.5-9B (Q3_K_M) | — | 29 | — | — | 120 tok/s |
-| DeepSeek-V4-Pro-9B (IQ4_XS) | — | 24 | — | — | 150 tok/s |
+| Qwen3.5-9B (Q3_K_M) | 23 | 29 | 52 | — | 120 tok/s |
+| DeepSeek-V4-Pro-9B (IQ4_XS) | 20 | 24 | 44 | — | 92.8 tok/s |
 
 Counting the repair loop as two items, Swift and Gyro tie at 65/69. Gyro is the
 better daily driver: it is the only model that can repair its own broken code,
@@ -129,6 +129,12 @@ truncation, not capability.
 | Swift 1.5 | **7** | **7** | 7 | **11** | 2 |
 | Bonsai 27B | **7** | **7** | 7 | **11** | 1 |
 | Gyro-S | **7** | **7** | 7 | 10 | 2 |
+| Qwen3.5-9B | 6 | **7** | 4 | 5 | 1 |
+| DeepSeek 9B | **7** | **7** | 2 | 3 | 1 |
+
+The two 9B models were first measured on the 30-item set only and completed on the
+37-item set afterwards, which is why their row was missing in the earlier version
+of this table.
 
 ## Speed and memory
 
@@ -139,7 +145,7 @@ truncation, not capability.
 | Bonsai 9B | 114 tok/s | 131,072 | ~3 GB |
 | Swift 27B | 36 tok/s | 32,768 | ~12.5 GB |
 | Bonsai 27B | 46 tok/s | 65,536 | ~8.5 GB |
-| DeepSeek 9B | ~150 tok/s | 65,536 | ~5.5 GB |
+| DeepSeek 9B | 92.8 tok/s | 65,536 | ~5.5 GB |
 
 Dense models are bandwidth bound: the ternary Q2_0 reads 7.6 GB per token and
 Swift IQ3_S reads 11.8 GB. On this card the observed ceiling for Bonsai 27B is
