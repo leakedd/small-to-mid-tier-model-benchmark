@@ -151,6 +151,28 @@ Dense models are bandwidth bound: the ternary Q2_0 reads 7.6 GB per token and
 Swift IQ3_S reads 11.8 GB. On this card the observed ceiling for Bonsai 27B is
 46.5 tok/s, and n-gram speculative decoding gave no gain at all (46.7 tok/s).
 
+## Optimisation experiments
+
+All measured on the same card, full log in [NOTES.md](NOTES.md).
+
+Vulkan (llama.cpp b12282) against the HIP build, decode only, tokens per second:
+
+| Model | HIP | Vulkan | Delta |
+|---|---:|---:|---:|
+| Cyber-Tiel MoE IQ3_XXS | 103.5 | 131.9 | **+27%** |
+| Bonsai 27B Q2_0 | 46.9 | 51.3 | +9.5% |
+| Qwen3.5-9B Q3_K_M | 96.5 | 101.2 | +5% |
+| Swift 27B IQ3_S | 36.2 | 29.2 | -19% |
+
+Vulkan helps the MoE the most and hurts Swift, whose mixed GSQ-RCO tensors map
+badly to Vulkan shaders. As a server, Vulkan with IQ3_XXS at 262,144 context and
+q8 KV gives 123 tok/s and 16.1 GB of VRAM, against 97 tok/s and 17.0 GB on HIP.
+
+The bigger win was not the backend but the quant. Running **IQ3_XXS (13.2 GB)
+instead of Q4_K_XL (21 GB)** inside the PolyStrata engine puts 8,502 of 10,496
+experts in VRAM instead of 4,161, and gives 128 tok/s on prose and 172 tok/s on
+code for a measured quality of 61/67 against 60/67.
+
 ## Limits
 
 - Samples of 30 to 70 items: a one or two point gap is not significant.
