@@ -60,3 +60,38 @@ partial offload destroys throughput.
 
 The CLI token is read-only on this repository; use the GitHub connector
 (github_update_file) instead. Browser access is blocked by a saved permission.
+
+## Engine tuning on the winning config
+
+Cyber-Tiel IQ3_XXS, 262,144 context, measured on prose and code prompts.
+
+| Threads | KV | VRAM reserve | Experts in VRAM | Prose tok/s | Code tok/s |
+|---|---|---:|---:|---:|---:|
+| 6 | q8 | 1024 MiB | 8,502 | 122-136 | 164-173 |
+| 8 | q8 | 1024 MiB | 8,502 | 127 | 177-182 |
+| 12 | q8 | 1024 MiB | 8,502 | 132-137 | 172-175 |
+| 8 | q8 | 384 MiB | 9,114 | 123-139 | 172 |
+| 8 | fp16 | 1024 MiB | 5,970 | 120-134 | 153-171 |
+
+Final choice: 8 threads, KV q8_0, 384 MiB reserve, which puts 9,114 of 10,496
+experts in VRAM and yields 131/134 tok/s on prose and 176/178 on code.
+
+Raising the resident expert count from 8,502 to 9,114 did not change speed, and
+fp16 KV costs both residents and throughput, so q8 stays.
+
+## LFM2.5-24B-A2B (new model, tested 2026-11-11)
+
+Uncensored IQ3_M, 12.1 GB, llama.cpp Vulkan, 65,536 context.
+
+| Metric | Value |
+|---|---:|
+| Decode (bench tg128) | 204.6 tok/s |
+| Prefill (bench pp512) | 4,142 tok/s Vulkan, 7,502 tok/s HIP |
+| 37-item set | 25/37 |
+| 30-item set | 26/30 |
+| Total | 51/67 |
+
+Two runs were needed. With a generous output budget the model spends everything
+thinking and returns an empty answer, which scored 28/37 but was not real. With
+the reasoning budget capped at 512 tokens it answers, gains on knowledge (17/18
+on cyber) and loses on calculation (6/11) and crypto (0/4), for the same total.
