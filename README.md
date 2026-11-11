@@ -1,155 +1,157 @@
-# Benchmarks de LLM locaux sur Radeon RX 9070 XT
+# Small to mid tier model benchmark
 
-Mesures comparatives de modèles 9B à 35B exécutés entièrement en local sur une
-carte 16 Go, avec PolyStrata, llama.cpp et le moteur ternaire Strata.
+A reproducible benchmark of local LLMs from 9B to 35B running on a single 16 GB
+consumer GPU, focused on cybersecurity, computer science and code. Every score
+in this repository comes from an automated harness: multiple choice answers are
+checked against a fixed key, and generated code is executed against assertions.
 
-L'objectif est de répondre à une question concrète : quel modèle local choisir
-pour du travail de sécurité et d'informatique, et à quel prix en vitesse et en
-contexte.
+The question banks are in [QUESTIONS.md](QUESTIONS.md) and the per-model results
+are in [ANSWERS.md](ANSWERS.md).
 
-## Matériel et logiciels
+## Quick summary
 
-| Élément | Valeur |
-|---|---|
-| GPU | Radeon RX 9070 XT, gfx1201 (RDNA4), 16 Go de VRAM |
-| CPU / RAM | 6 cœurs / 12 threads, 30 Go |
-| Disque | NVMe PCIe Gen5 |
-| OS | Ubuntu, ROCm |
-| Moteurs | strata 0.1.56, engine-poly 0.1.45, llama.cpp build Clover HIP (master nov. 2026) |
+Six models were tested across 67 items plus a 2-task repair loop.
 
-## Modèles évalués
-
-| Modèle | Format | Taille | Contexte |
-|---|---|---:|---:|
-| Cybertiel Coder 35B-A3B | GGUF UD-Q4_K_XL (MoE) | 22,4 Go | 262 144 |
-| Gyro-S (Qwen3.8 Flash-Next) | TQ1_0 abliterated (MoE) | 55 Go | 262 144 |
-| Ornith 1.5 35B-A3B | GGUF CRACK Q4_K_M (MoE) | 20,2 Go | 262 144 |
-| Bonsai 2 27B | GGUF Q2_0 ternaire (dense) | 7,6 Go | 65 536 testés |
-| Swift 1.5 27B | GGUF IQ3_S GSQ-RCO (dense) | 11,8 Go | 32 768 testés |
-| Qwen3.5-9B | GGUF Q3_K_M (dense) | 4,7 Go | 32 768 testés |
-| DeepSeek-V4-Pro-9B heretic | GGUF IQ4_XS (dense, base Qwen3.5-9B) | 5,2 Go | 65 536 |
-| Bonsai 2 9B | GGUF Q2_0 ternaire | 2,6 Go | 131 072 |
-
-## Protocole
-
-Cinq batteries, toutes scorées automatiquement, sans jugement humain :
-
-1. **Cyber et informatique (18)** — 7 questions de sécurité, 7 d'informatique
-   système, 4 implémentations. Réponses à choix unique vérifiées, code exécuté
-   contre des assertions.
-2. **Calcul et implémentation (11)** — goodput TCP, LRU, table de pages, Amdahl,
-   RSA à exposant 3, SQL de second ordre, TOCTOU, puis segment tree, Rabin-Karp,
-   Dijkstra et chaîne de matrices.
-3. **Cryptographie et algorithmique (4)** — ChaCha20 contre le vecteur RFC 8439,
-   HKDF contre RFC 5869, moteur regex avec point et étoile, table de suffixes.
-4. **Grosse batterie (30)** — 12 cyber, 10 informatique, 4 numériques, 4
-   implémentations (merge-k, n-queens, distance d'édition, sudoku).
-5. **Réparation (2)** — un code volontairement cassé est fourni avec ses tests
-   en échec ; l'erreur est renvoyée au modèle jusqu'à trois tours.
-
-Le budget de sortie est fixé entre 2 500 et 5 000 tokens selon la batterie. Ce
-point est décisif : les modèles de raisonnement consomment le budget en réflexion
-et, avec 600 tokens, la réponse n'est jamais émise. Les premières mesures, faites
-à 600 tokens, sous-estimaient fortement Bonsai (10/16 au lieu de 14/16).
-
-Le code produit est exécuté dans un lanceur restreint : hook d'audit Python
-bloquant les sockets, les sous-processus, les écritures hors bac et les lectures
-de fichiers système, complété par des limites CPU, mémoire et taille de fichier.
-
-## Résultats
-
-### Classement général (67 épreuves + réparation)
-
-| Modèle | 37 épreuves | Grosse batterie /30 | Total /67 | Réparation | Décodage |
+| Model | 37-item set | 30-item set | Total /67 | Repair | Decode |
 |---|---:|---:|---:|---:|---:|
-| Swift 1.5 27B | **34** | **30** | **64** | 1/2 | 36 tok/s |
-| Gyro-S | 33 | **30** | 63 | **2/2** | 74 tok/s |
-| Bonsai 27B | 33 | 29 | 62 | 1/2 | 46 tok/s |
-| Cybertiel 35B-A3B | 32 | 28 | 60 | 1/2 | 114 tok/s |
-| Qwen3.5-9B Q3 | — | 29 | — | — | 120 tok/s |
-| DeepSeek-V4-Pro-9B | — | 24 | — | — | 150 tok/s |
+| Swift 1.5 27B (IQ3_S) | 34 | 30 | **64** | 1/2 | 36 tok/s |
+| Gyro-S (Qwen3.8 Flash-Next MoE) | 33 | 30 | 63 | **2/2** | 74 tok/s |
+| Bonsai 2 27B (Q2_0 ternary) | 33 | 29 | 62 | 1/2 | 46 tok/s |
+| Cybertiel 35B-A3B (UD-Q4_K_XL) | 32 | 28 | 60 | 1/2 | 114 tok/s |
+| Qwen3.5-9B (Q3_K_M) | — | 29 | — | — | 120 tok/s |
+| DeepSeek-V4-Pro-9B (IQ4_XS) | — | 24 | — | — | 150 tok/s |
 
-En ajoutant la réparation sur 2 points, Swift et Gyro sont à égalité à 65/69.
-Gyro reste devant en usage réel : il est le seul à savoir corriger son propre
-code, il tient 262 144 de contexte et tourne deux fois plus vite.
+Counting the repair loop as two items, Swift and Gyro tie at 65/69. Gyro is the
+better daily driver: it is the only model that can repair its own broken code,
+it holds 262,144 tokens of context, and it decodes twice as fast as Swift.
 
-### Détail par domaine (batterie 37)
+The three findings worth keeping:
 
-| Modèle | Cyber /7 | Informatique /7 | Code /8 | Calcul /11 | Crypto /4 |
+1. Knowledge questions barely separate these models. Across 70 knowledge items,
+   59 are passed by every model, and the whole spread comes from 11 items. The
+   four 27B models all derive from Qwen, so they share strengths and blind spots.
+2. Code separates them. No model writes ChaCha20 from RFC 8439 in one shot, and
+   none writes a correct regex engine first try. Only Gyro fixes ChaCha20 when
+   the failing assertion is handed back.
+3. A fine-tune can regress. DeepSeek-V4-Pro-9B, built on Qwen3.5-9B, loses five
+   points against its own base model on the same battery, including all four
+   implementation tasks.
+
+## Hardware and software
+
+| Item | Value |
+|---|---|
+| GPU | Radeon RX 9070 XT, gfx1201 (RDNA4), 16 GB VRAM |
+| CPU / RAM | 6 cores / 12 threads, 30 GB |
+| Disk | NVMe PCIe Gen5 |
+| OS | Ubuntu, ROCm |
+| Runtimes | strata 0.1.56, engine-poly 0.1.45, llama.cpp Clover HIP build (Nov 2026) |
+
+## Models
+
+| Model | Format | Size | Context used |
+|---|---|---:|---:|
+| Cybertiel Coder 35B-A3B | GGUF UD-Q4_K_XL, MoE | 22.4 GB | 262,144 |
+| Gyro-S | TQ1_0 abliterated, MoE | 55 GB | 262,144 |
+| Ornith 1.5 35B-A3B | GGUF CRACK Q4_K_M, MoE | 20.2 GB | 262,144 |
+| Bonsai 2 27B | GGUF Q2_0 ternary, dense | 7.6 GB | 65,536 |
+| Swift 1.5 27B | GGUF IQ3_S GSQ-RCO, dense | 11.8 GB | 32,768 |
+| Qwen3.5-9B | GGUF Q3_K_M, dense | 4.7 GB | 32,768 |
+| DeepSeek-V4-Pro-9B heretic | GGUF IQ4_XS, dense | 5.2 GB | 65,536 |
+| Bonsai 2 9B | GGUF Q2_0 ternary | 2.6 GB | 131,072 |
+
+## Test protocol
+
+Five batteries, all scored automatically with no human grading.
+
+**Battery A, cyber and computer science (18 items).** Seven security questions,
+seven systems questions, four implementations. The security set covers AES-GCM
+nonce reuse, JWT algorithm confusion, SSRF filter bypass, CSP nonce and
+strict-dynamic, SUID PATH hijack, Kerberos golden tickets and TLS 1.3 key
+exchange. The systems set covers MESI transitions, TCP TIME_WAIT, SSA phi
+functions, release semantics, B+tree range scans, TLB shootdown and priority
+inheritance. The code set asks for a path containment check, a JWT verifier, a
+binary search over a predicate and cycle detection.
+
+**Battery B, calculation and implementation (11 items).** Five numeric questions
+requiring multi-step arithmetic (TCP goodput, LRU hit count, page table entries,
+Amdahl speedup, RSA cube root without padding), two secure coding review
+questions (SQL injection through ORDER BY, TOCTOU in a file copy), and four
+implementations: segment tree range sums, Rabin-Karp with overlap, Dijkstra, and
+matrix chain ordering.
+
+**Battery C, cryptography and algorithmic (4 items).** ChaCha20 block function
+checked against the RFC 8439 test vector, HKDF-SHA256 checked against RFC 5869,
+a regex matcher supporting dot and Kleene star with full match semantics, and a
+suffix array.
+
+**Battery D, the large set (30 items).** Twelve cyber items (ECB block equality,
+Kerberoasting, NTLM relay, CAP_NET_RAW, IMDSv2, HttpOnly, stack canaries, ASLR
+bypass requirements, JWT kid injection, certificate pinning, padding oracles,
+second order SQL injection), ten systems items (false sharing, TCP fast
+retransmit, binary heap build cost, consistent hashing, copy on write, two phase
+commit, Bloom filters, RAID 5 write hole, NUMA, spinlocks), four numeric items
+(64 GiB address space page table size, TCP segments for open and close, RSA-2048
+plaintext limit, AES-GCM tag size) and four implementations (merge k sorted
+lists, n-queens count, Levenshtein distance, Sudoku solver).
+
+**Battery E, repair loop (2 tasks).** A deliberately broken implementation is
+given together with its failing tests. The model must return fixed code. If the
+tests still fail, the assertion error is sent back, for up to three rounds. The
+tasks are the ChaCha20 block function with four double rounds instead of ten,
+and a greedy regex matcher without backtracking.
+
+### Scoring rules
+
+For multiple choice, the model must end with a line of the form REPONSE: X.
+If that line is missing, the harness falls back to the last standalone letter in
+the answer. This fallback matters: reasoning models spend the output budget on
+thinking and never emit the final line, which produces format failures that look
+like knowledge failures.
+
+For code, the Python block is extracted from the answer and executed. The
+runner is restricted: an audit hook blocks sockets, subprocesses, writes outside
+the temporary directory and reads of system files, and rlimits cap CPU, memory
+and file size.
+
+### Output budget
+
+The budget is 2,500 to 5,000 tokens depending on the battery. This is decisive.
+With the 600-token budget used in the first runs, Bonsai scored 10/16 on the
+public set; at 2,500 tokens the same questions gave 14/16. The lower number was
+truncation, not capability.
+
+## Results by domain (37-item set)
+
+| Model | Cyber /7 | Systems /7 | Code /8 | Calculation /11 | Crypto /4 |
 |---|---:|---:|---:|---:|---:|
 | Cybertiel | 6 | 6 | **8** | 10 | 2 |
 | Swift 1.5 | **7** | **7** | 7 | **11** | 2 |
 | Bonsai 27B | **7** | **7** | 7 | **11** | 1 |
 | Gyro-S | **7** | **7** | 7 | 10 | 2 |
 
-### Ce que la batterie ne discrimine pas
+## Speed and memory
 
-Sur 70 questions de connaissance, **59 sont réussies par tous les modèles**. Tout
-l'écart tient dans 11 items : injection SQL dans un ORDER BY, TOCTOU, sémantique
-de nonce CSP, confusion d'algorithme JWT, contournement de filtre SSRF, golden
-ticket KRBTGT, transition MESI, parsing CSV, top-k avec ex æquo, late binding
-Python et le problème batte-et-balle. Les quatre modèles 27B descendent de la
-même base Qwen : ils partagent les mêmes points forts et les mêmes angles morts,
-ce qui rend les questions de cours peu informatives pour les classer.
-
-### Les murs techniques
-
-- **ChaCha20 depuis la RFC : aucun modèle ne le passe en one-shot**, sur quatre
-  tentatives indépendantes. Seul Gyro le répare quand on lui rend l'erreur.
-- **Moteur regex complet** : échec unanime en one-shot, corrigé par tous en deux
-  tours au maximum.
-- **Rabin-Karp avec chevauchements** : seuls Swift et Bonsai passent en one-shot ;
-  Gyro et Cybertiel échouent là mais réussissent le reste du bloc.
-
-### Vitesse et empreinte
-
-| Modèle | Décodage | Contexte utile | VRAM |
+| Model | Decode | Usable context | VRAM |
 |---|---:|---:|---:|
-| Cybertiel 35B-A3B | 109-120 tok/s | 262 144 | ~14,7 Go |
-| Gyro-S | 73-77 tok/s | 262 144 | ~15,4 Go |
-| Bonsai 9B | 114 tok/s | 131 072 | ~3 Go |
-| Swift 27B | 36 tok/s | 32 768 | ~12,5 Go |
-| Bonsai 27B | 46 tok/s | 65 536 | ~8,5 Go |
-| DeepSeek 9B | ~150 tok/s | 65 536 | ~5,5 Go |
+| Cybertiel 35B-A3B | 109-120 tok/s | 262,144 | ~14.7 GB |
+| Gyro-S | 73-77 tok/s | 262,144 | ~15.4 GB |
+| Bonsai 9B | 114 tok/s | 131,072 | ~3 GB |
+| Swift 27B | 36 tok/s | 32,768 | ~12.5 GB |
+| Bonsai 27B | 46 tok/s | 65,536 | ~8.5 GB |
+| DeepSeek 9B | ~150 tok/s | 65,536 | ~5.5 GB |
 
-Le décodage des modèles denses est limité par la bande passante mémoire : le
-ternaire Q2_0 lit 7,6 Go par token, le IQ3_S de Swift 11,8 Go. Sur cette carte,
-le plafond observé pour Bonsai 27B est de 46,5 tok/s, et le décodage spéculatif
-par n-grammes n'apporte rien (46,7 tok/s mesurés).
+Dense models are bandwidth bound: the ternary Q2_0 reads 7.6 GB per token and
+Swift IQ3_S reads 11.8 GB. On this card the observed ceiling for Bonsai 27B is
+46.5 tok/s, and n-gram speculative decoding gave no gain at all (46.7 tok/s).
 
-## Enseignements
+## Limits
 
-1. Le format de sortie compte autant que le modèle. Trois échecs sur la grosse
-   batterie viennent d'une ligne de réponse absente, pas d'une erreur de fond.
-2. Les 9B tiennent la connaissance mais s'effondrent sur le code : DeepSeek 9B
-   rate les quatre implémentations, sa base Qwen en réussit trois.
-3. Un fine-tune peut régresser : DeepSeek-V4-Pro-9B perd cinq points face à son
-   modèle de base Qwen3.5-9B sur la même batterie.
-4. La boucle de réparation est le meilleur discriminant observé. Elle sépare
-   Gyro (2/2, un tour) de Swift, Bonsai et Cybertiel (1/2, deux tours ou échec).
+- Samples of 30 to 70 items: a one or two point gap is not significant.
+- Speed depends on the ROCm build and varies 10 to 15 percent between sessions.
+- All four 27B models share a Qwen base, so measured knowledge is largely common.
+- No multi-step agentic tool use is included yet.
 
-## Méthode de reproduction
+## License
 
-Chaque batterie est un script Python autonome qui prend quatre arguments : URL
-de base compatible OpenAI, nom du modèle, étiquette de sortie et clé API. Les
-épreuves de code extraient le bloc Python de la réponse et l'exécutent dans un
-lanceur restreint, puis comparent le résultat aux assertions attendues.
-
-Pour les QCM, la réponse est lue sur une ligne finale du type REPONSE: <lettre>,
-avec repli sur la dernière lettre isolée du texte. Ce détail a son importance :
-les modèles qui raisonnent beaucoup épuisent le budget avant d'écrire cette
-ligne, ce qui produit des échecs de format et non de connaissance.
-
-## Limites
-
-- Échantillons de 30 à 70 items : un écart de 1 à 2 points n'est pas significatif.
-- Les mesures de vitesse dépendent du build ROCm et du moment ; elles varient de
-  10 à 15 % d'une session à l'autre.
-- Les quatre modèles 27B partagent une base Qwen, donc la connaissance mesurée
-  est largement commune.
-- Aucun test agentique multi-étapes avec outils n'est inclus à ce stade.
-- Les scripts et les sorties brutes peuvent être ajoutés au dépôt sur demande.
-
-## Licence
-
-MIT pour les textes et scripts.
+MIT for text and scripts.
