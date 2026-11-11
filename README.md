@@ -21,6 +21,7 @@ Six models were tested across 67 items plus a 2-task repair loop.
 | Qwen3.5-9B (Q3_K_M) | 23 | 29 | 52 | — | 120 tok/s |
 | DeepSeek-V4-Pro-9B (IQ4_XS) | 20 | 24 | 44 | — | 92.8 tok/s |
 | LFM2.5-24B-A2B uncensored (IQ3_M) | 25 | 26 | 51 | — | 204 tok/s |
+| TwIL-8B (Q4_K_M) | 21 | 27 | 48 | — | 95 tok/s |
 
 Counting the repair loop as two items, Swift and Gyro tie at 65/69. Gyro is the
 better daily driver: it is the only model that can repair its own broken code,
