@@ -95,3 +95,24 @@ Two runs were needed. With a generous output budget the model spends everything
 thinking and returns an empty answer, which scored 28/37 but was not real. With
 the reasoning budget capped at 512 tokens it answers, gains on knowledge (17/18
 on cyber) and loses on calculation (6/11) and crypto (0/4), for the same total.
+
+## TwIL-8B (tested 2026-11-11)
+
+Q4_K_M, 5.1 GB, llama.cpp Vulkan, 32,768 context.
+
+| Metric | Value |
+|---|---:|
+| Decode | 94.5 tok/s |
+| 37-item set | 21/37 |
+| 30-item set | 27/30 |
+| Total | 48/67 |
+
+The profile is telling: 27/30 on knowledge, the best of the small models, but
+5/11 on calculation and 0/4 on crypto. It recalls facts well and does not carry a
+computation through.
+
+## Tuning that did not help
+
+- `--prompt-batch 4096`: prefill 3,700 tok/s against 3,739 at 2,048, no gain.
+- `--window 8`: 124-134 on prose and 169-173 on code, slightly below window 4.
+- `--vram-reserve-mib 384` raised residents from 8,502 to 9,114 but left speed unchanged.
