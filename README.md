@@ -178,6 +178,29 @@ instead of Q4_K_XL (21 GB)** inside the PolyStrata engine puts 8,502 of 10,496
 experts in VRAM instead of 4,161, and gives 128 tok/s on prose and 172 tok/s on
 code for a measured quality of 61/67 against 60/67.
 
+## Reproduce
+
+The batteries and the sandboxed runner are in `scripts/`. Every battery takes four
+arguments: base URL, model name, output tag, API key.
+
+```bash
+python3 scripts/bench_big.py http://127.0.0.1:8092 my-model mytag "$API_KEY"
+```
+
+| Script | Items | What it covers |
+|---|---:|---|
+| bench_cybercs.py | 18 | cyber, systems, four implementations |
+| bench_big.py | 30 | the large battery |
+| bench_d2.py | 11 | calculation, review, four implementations |
+| bench_d3.py | 4 | ChaCha20 RFC vector, HKDF, regex, suffix array |
+| bench_tb.py | 4 | tie-break implementations |
+| bench_rep.py | 2 | repair loop, three attempts each |
+| sbx.py | — | restricted runner used by every code item |
+
+`sbx.py` blocks sockets, subprocesses, writes outside the temporary directory and
+reads of system files, and caps CPU, memory and file size. Code items fail
+without it.
+
 ## Limits
 
 - Samples of 30 to 70 items: a one or two point gap is not significant.
