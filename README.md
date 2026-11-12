@@ -6,8 +6,9 @@ in this repository comes from an automated harness: multiple choice answers are
 checked against a fixed key, and generated code is executed against assertions.
 
 The question banks are in [QUESTIONS.md](QUESTIONS.md), the per-model results in
-[ANSWERS.md](ANSWERS.md), and the overall ranking with decode speed in
-[RANKING.md](RANKING.md).
+[ANSWERS.md](ANSWERS.md), the overall ranking with decode speed in
+[RANKING.md](RANKING.md), and the list of every model tested with the battery
+version it used in [COVERAGE.md](COVERAGE.md).
 
 ## Quick summary
 
