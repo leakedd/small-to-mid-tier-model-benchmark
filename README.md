@@ -5,6 +5,9 @@ consumer GPU, focused on cybersecurity, computer science and code. Every score
 in this repository comes from an automated harness: multiple choice answers are
 checked against a fixed key, and generated code is executed against assertions.
 
+Last updated 2026-11-12. Ten model configurations on the 67-item set, nine more on
+the earlier 56-item set.
+
 The question banks are in [QUESTIONS.md](QUESTIONS.md), the per-model results in
 [ANSWERS.md](ANSWERS.md), the overall ranking with decode speed in
 [RANKING.md](RANKING.md), and the list of every model tested with the battery
