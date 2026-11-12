@@ -116,3 +116,27 @@ computation through.
 - `--prompt-batch 4096`: prefill 3,700 tok/s against 3,739 at 2,048, no gain.
 - `--window 8`: 124-134 on prose and 169-173 on code, slightly below window 4.
 - `--vram-reserve-mib 384` raised residents from 8,502 to 9,114 but left speed unchanged.
+
+## IQ3_S of Cyber-Tiel (tested 2026-11-12)
+
+Same engine, same context, only the weights change (13.7 GB against 13.2).
+
+| Metric | IQ3_XXS | IQ3_S |
+|---|---:|---:|
+| Experts in VRAM | 9,114 | 8,669 |
+| Prose tok/s | 120-138 | 118-126 |
+| Code tok/s | 172-174 | 163-174 |
+| Cyber and CS | 16/18 | **18/18** |
+| Tie-break | 4/4 | 3/4 |
+| Calculation | 11/11 | 10/11 |
+| Crypto | 1/4 | 1/4 |
+| 37-item set | 32 | 32 |
+| Large battery | 29/30 | 29/30 |
+| Total | 61/67 | 61/67 |
+
+The extra 500 MB buys a perfect cyber score and loses a point in calculation,
+ending on the same total while decoding slightly slower. IQ3_XXS stays in
+production.
+
+Disk note: the machine is at 99 percent with 5.5 GB free, so any further model
+test needs a deletion first.
