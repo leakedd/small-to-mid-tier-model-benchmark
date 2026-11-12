@@ -16,6 +16,10 @@ llama-bench, so the numbers match what you get in real use.
 | 8 | TwIL-8B (Q4_K_M) | 48 | 95 tok/s | 32K | 27/30 on knowledge, 0/4 on crypto |
 | 9 | DeepSeek-V4-Pro-9B (IQ4_XS) | 44 | 93 tok/s | 65K | below its own Qwen base |
 
+A third Cyber-Tiel variant was tested: IQ3_S, 500 MB larger. It reaches the same
+61/67 with a perfect 18/18 on the cyber and systems set, but loses a tie-break
+item and decodes 2 to 4 percent slower, so IQ3_XXS stays the choice.
+
 ## Verdict
 
 **The best model is Cybertiel in IQ3_XXS inside the PolyStrata engine.** It scores
