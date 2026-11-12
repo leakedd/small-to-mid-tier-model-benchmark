@@ -11,7 +11,7 @@ The question banks are in [QUESTIONS.md](QUESTIONS.md), the per-model results in
 
 ## Quick summary
 
-Six models were tested across 67 items plus a 2-task repair loop.
+Nine models were tested across 67 items plus a 2-task repair loop.
 
 | Model | 37-item set | 30-item set | Total /67 | Repair | Decode |
 |---|---:|---:|---:|---:|---:|
@@ -19,14 +19,16 @@ Six models were tested across 67 items plus a 2-task repair loop.
 | Gyro-S (Qwen3.8 Flash-Next MoE) | 33 | 30 | 63 | **2/2** | 74 tok/s |
 | Bonsai 2 27B (Q2_0 ternary) | 33 | 29 | 62 | 1/2 | 46 tok/s |
 | Cybertiel 35B-A3B (UD-Q4_K_XL) | 32 | 28 | 60 | 1/2 | 114 tok/s |
-| Qwen3.5-9B (Q3_K_M) | 23 | 29 | 52 | — | 120 tok/s |
+| **Cybertiel 35B-A3B (IQ3_XXS, engine + MTP)** | 32 | 29 | **61** | 1/2 | **128 prose / 176 code** |
+| Qwen3.5-9B (Q3_K_M) | 23 | 29 | 52 | — | 114 tok/s |
 | DeepSeek-V4-Pro-9B (IQ4_XS) | 20 | 24 | 44 | — | 92.8 tok/s |
 | LFM2.5-24B-A2B uncensored (IQ3_M) | 25 | 26 | 51 | — | 204 tok/s |
 | TwIL-8B (Q4_K_M) | 21 | 27 | 48 | — | 95 tok/s |
 
-Counting the repair loop as two items, Swift and Gyro tie at 65/69. Gyro is the
-better daily driver: it is the only model that can repair its own broken code,
-it holds 262,144 tokens of context, and it decodes twice as fast as Swift.
+Counting the repair loop as two items, Swift and Gyro tie at 65/69. For daily
+use the recommendation is Cybertiel in IQ3_XXS inside the PolyStrata engine: one
+point under Swift in raw score, but 128 tok/s on prose, 176 on code and 262,144
+of context. See [RANKING.md](RANKING.md) for the full argument.
 
 The three findings worth keeping:
 
